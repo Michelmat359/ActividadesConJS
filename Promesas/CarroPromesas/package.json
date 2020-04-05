@@ -1,0 +1,11 @@
+{
+  "name": "socket-chat-example",
+  "version": "1.0.0",
+  "description": "my first socket.io app",
+  "main": "cart.js",
+  "dependencies": {
+    "mongodb": "^3.5.2",
+    "q": "^1.5.1"
+  },
+  "devDependencies": {}
+}

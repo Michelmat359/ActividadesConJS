@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chat SAD</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- CSS -->
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      /* mas css */
+      #col-lg-12 { padding: 0;}
+      #usersList { list-style-type: circle; color: white;  margin: 0; padding: 0; font: 20px Helvetica, Arial; text-align: center; }
+      #name { list-style-type: none; margin: 0; padding: 0; font: bold 32px Helvetica, Arial; text-align: center; }
+      form#usersForm { background: rgb(110, 108, 108); padding: 3px; top: 0; width: 475px; height: 50%; }
+      div#users { background: rgb(110, 108, 108); padding: 3px; bottom: 0; position: fixed; width: 475px; height: 50%; }
+      div#c { right: 0; position: fixed; width: 20%; height: 100%; background: #ccc; padding: 10px; }
+    </style>
+  </head>
+  <body>
+
+<div class="col-md-12" style="padding-left: 0px; padding-right: 0px; width: 90%;">
+  
+  <!-- columna chat -->
+    <div class="col-md-10" >
+      
+        <ul id="messages"></ul>
+      
+    </div>
+    
+    <!-- HTML  -->
+    <!-- <div id="column" style="display: flex; position: relative;"> -->
+      <!-- Columna usuario -->
+    <div class="col-md-2" style="padding-right: 0px; padding-left: 0px; position:relative;">  
+      <form id="usersForm">
+        <table style="width:100%">
+          <tr>
+            <th style="color: white" id="currentUser">Usuario Anonimo</th>
+            <ul id="actualUser"></ul>
+          </tr>
+        </table>
+        <div style="padding: 1rem;" class="usernameInput">
+          <p style="color: white">Usuario:</p>
+          <input id="usernameInput" style="width: 100%;">
+        </div>
+        <div style="display: grid; justify-content: center;">
+          <button id="sendUsernameButton" class="btn btn-success" style="width: 100%">Conectarse</button>
+        </div>
+      </form>
+
+      <div id="users">
+        <p style="color: white; padding: 0.5rem">Lista de usuarios:</p>
+        <ul id="usersList"></ul> 
+      </div>
+
+    </div>
+
+    <div class="col-md-12" style="padding-left: 0px; padding-right: 0px;">
+      <form id="messageForm"  class="form-control" style="height: 50px;" action="">
+        <input id="m" autocomplete="off" /><button class="btn btn-primary" id="sendMessage">Send</button>
+      </form>
+    </div>
+    
+  </div>
+    <!-- SCRIPTS -->
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      var messageBox = document.getElementById('m');
+      let timeout;
+      let user;
+
+      $('messageForm').submit(function(){
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+
+      $('#usersForm').submit(function () {
+      user = $('#usernameInput').val();
+      socket.emit('login', user);
+      $('#sendUsernameButton').attr("disabled", true);
+      $('#usersList').append('<ul>' + user + '</ul>');
+      $('#usernameInput').prop("disabled", true);
+      $('#currentUser').text('Usuario: ' + user);
+      $('#usernameInput').val('');
+      $('#m').prop("disabled", false);
+      $('#sendMessage').attr("disabled", false);
+      return false;
+      });
+
+      $(document).ready(function () {
+       $('#m').prop("disabled", true);
+        $('#sendMessage').attr("disabled", true);
+      });
+      socket.on('chat message', function(msg){
+        $('#messages').append($('<li>').text(msg));
+      });
+
+      socket.on('users list', function (msg) {
+        $('#usersList').empty();
+        for (i in msg) {
+          $('#usersList').append('<ul>' + msg[i] + '</ul>');
+        }
+      });
+
+      $('#messageForm').submit(function () {
+        socket.emit('chat message', $('#m').val(), user);
+        $('#messages').append($('<li>').text(timestamp() + user +': ' + $('#m').val()));
+        $('#m').val('');
+      return false;
+    });
+
+
+    function timestamp() {
+      var date = new Date();
+      return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' - ';
+    }
+    </script>
+  </body>
+</html>
